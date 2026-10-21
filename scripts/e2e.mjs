@@ -118,6 +118,12 @@ async function coreSuite(context, page, base) {
   await page.locator('.appbar h1', { hasText: '통화 검색' }).waitFor();
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 20_000 });
   step('service worker controls the page');
+  const cdp = await context.newCDPSession(page);
+  const { installabilityErrors } = await cdp.send('Page.getInstallabilityErrors');
+  const { errors: manifestErrors } = await cdp.send('Page.getAppManifest');
+  await cdp.detach();
+  const installProblems = [...installabilityErrors.map((e) => e.errorId), ...manifestErrors.map((e) => e.message)];
+  check(installProblems.length === 0, `Chrome parses the manifest without errors and reports the app installable (${JSON.stringify(installProblems)})`);
   check((await page.locator('.empty h2').textContent()) === '아직 통화 기록이 없어요', 'empty library state shown');
   await shot(page, 'core-01-empty');
 
@@ -149,7 +155,8 @@ async function coreSuite(context, page, base) {
 
   await page.locator('.rows .row').first().click();
   await page.locator('.transcript', { hasText: '회의 일정을 금요일 오전으로 바꾸죠.' }).waitFor();
-  step('record view shows the full transcript');
+  const detailText = (await page.locator('.transcript').innerText()).replace(/\s+/g, ' ').trim();
+  check(detailText.includes('회의 일정을 금요일 오전으로 바꾸죠. 장소는 본사 3층 회의실입니다.'), `record view shows the full transcript (${detailText})`);
   await shot(page, 'core-03-record');
   await page.getByRole('button', { name: '편집' }).click();
   const edit = page.locator('dialog.sheet[open]');
@@ -215,8 +222,15 @@ async function coreSuite(context, page, base) {
     document.body.append(form);
   });
   await page.setInputFiles('#share-file', { name: '01025777190_20261020051500.m4a', mimeType: 'audio/mp4', buffer: Buffer.from('not really audio') });
-  await Promise.all([page.waitForURL(/#\/import/), page.evaluate(() => document.getElementById('share-form').submit())]);
-  step(`share-target POST redirected to ${page.url()}`);
+  const [shareResponse] = await Promise.all([
+    page.waitForResponse((response) => response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/share-target')),
+    page.waitForURL(/#\/import/),
+    page.evaluate(() => document.getElementById('share-form').submit()),
+  ]);
+  check(
+    shareResponse.status() === 303,
+    `the multipart share-target POST is answered with ${shareResponse.status()} (fromServiceWorker=${shareResponse.fromServiceWorker()}, location ${shareResponse.headers().location}) and lands on ${page.url()}`,
+  );
   const modelNotice = page.locator('dialog.sheet[open]', { hasText: '음성 인식 모델 내려받기' });
   await modelNotice.waitFor();
   check((await modelNotice.textContent()).includes('huggingface.co'), 'shared audio asks before downloading the speech model');
