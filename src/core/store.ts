@@ -118,7 +118,10 @@ export class Store {
       const next: CallRecord = { ...current, ...patch, updatedAt: now };
       if (patch.contact !== undefined) next.contact = patch.contact.normalize('NFC').trim();
       if (patch.number !== undefined) next.number = patch.number.trim();
-      if (patch.text !== undefined) next.text = cleanText(patch.text);
+      if (patch.text !== undefined) {
+        next.text = cleanText(patch.text);
+        if (next.text !== current.text) delete next.segments;
+      }
       if (!Number.isFinite(next.date)) throw new Error('date must be a finite timestamp');
       store.put(next);
       return next;

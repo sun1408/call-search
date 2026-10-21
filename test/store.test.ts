@@ -59,6 +59,13 @@ describe('Store records', () => {
     expect(await store.getRecord(r.id)).toEqual(u);
   });
 
+  test('editing the text drops the now-stale timed segments', async () => {
+    const store = await openStore();
+    const r = await store.addRecord({ ...draft('원래 문장', 1000), source: 'audio', segments: [{ start: 0, end: 1, text: '원래 문장' }] });
+    expect((await store.updateRecord(r.id, { text: '원래 문장' })).segments).toHaveLength(1);
+    expect((await store.updateRecord(r.id, { text: '고친 문장' })).segments).toBeUndefined();
+  });
+
   test('update of a missing record fails and changes nothing', async () => {
     const store = await openStore();
     await expect(store.updateRecord('nope', { contact: 'x' })).rejects.toThrow('not found');
