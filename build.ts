@@ -4,7 +4,7 @@ import { readdir } from 'node:fs/promises';
 import { CSP } from './src/core/csp';
 
 const OUT = 'docs';
-const SHELL = ['index.html', 'app.js', 'app.css', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'];
+const SHELL = ['index.html', 'app.js', 'app.css', 'asr-worker.js', 'embed-worker.js', 'llm-worker.js', 'whisper-worker.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'];
 
 async function listFiles(dir: string): Promise<string[]> {
   const files: string[] = [];
@@ -44,6 +44,10 @@ await Bun.write(`${OUT}/index.html`, html.replace('%CSP%', CSP));
 
 const define = { __VERSION__: JSON.stringify(version) };
 await bundle('src/app/main.ts', 'app.js', 'esm', define);
+await bundle('src/workers/asr-worker.ts', 'asr-worker.js', 'iife', define);
+await bundle('src/workers/embed-worker.ts', 'embed-worker.js', 'esm', define);
+await bundle('src/workers/llm-worker.ts', 'llm-worker.js', 'esm', define);
+await bundle('src/workers/whisper-worker.ts', 'whisper-worker.js', 'esm', define);
 await bundle('src/sw.ts', 'sw.js', 'iife', { ...define, __SHELL__: JSON.stringify(SHELL) });
 
 for (const path of SHELL) {

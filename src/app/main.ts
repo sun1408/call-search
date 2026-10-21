@@ -1,6 +1,5 @@
 import { Store } from '../core/store';
 import { App } from './app';
-import { PendingTranscriber } from './asr';
 import { h } from './dom';
 import { toast } from './ui';
 
@@ -41,7 +40,7 @@ async function boot(): Promise<void> {
     );
     return;
   }
-  const app = new App(store, new PendingTranscriber(), root);
+  const app = new App(store, root);
   await app.start();
   await registerServiceWorker(app);
 }

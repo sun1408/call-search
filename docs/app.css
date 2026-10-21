@@ -357,6 +357,48 @@ a.notice { color: inherit; text-decoration: none; }
 .transcript p { margin: 0; font-size: 17px; line-height: 1.75; }
 .ts { display: block; color: var(--text-tertiary); font: 500 13px/1.4 var(--font-mono); font-variant-numeric: tabular-nums; }
 
+.similar { display: grid; gap: var(--space-2); margin-top: var(--space-5); }
+.similar > h2 { margin: 0; color: var(--text-secondary); font-size: 14px; font-weight: 700; }
+.ask { display: grid; grid-template-rows: 1fr auto; min-block-size: 100%; }
+.chat-log { display: grid; align-content: start; gap: var(--space-6); padding-top: var(--space-2); }
+.turn { display: grid; gap: var(--space-3); }
+.bubble {
+  justify-self: end; max-width: 85%; margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md); background: var(--surface-tint);
+  white-space: pre-wrap;
+}
+.answer { display: grid; gap: var(--space-3); }
+.answer-text { margin: 0; font-size: 17px; line-height: 1.75; white-space: pre-wrap; }
+.working { display: flex; align-items: center; gap: var(--space-2); margin: 0; }
+.working .icon { animation: spin 1s linear infinite; }
+.sources { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.chip.source { height: auto; min-height: 36px; padding: var(--space-1) var(--space-3); text-decoration: none; }
+.examples { justify-content: center; }
+.examples .chip { height: auto; min-height: 40px; padding: var(--space-2) var(--space-3); }
+.composer {
+  position: sticky; bottom: 0;
+  display: flex; align-items: flex-end; gap: var(--space-2);
+  padding: var(--space-2) max(var(--space-4), calc(50% - var(--content-max) / 2 + var(--space-4)));
+  background: var(--surface-page);
+  border-top: 1px solid var(--border-default);
+}
+.composer textarea {
+  flex: 1; min-height: 44px; max-height: 160px;
+  padding: 10px var(--space-3); resize: none;
+  background: var(--surface-card); color: var(--text-primary);
+  border: 1px solid var(--border-default); border-radius: var(--radius-md);
+  font-size: 16px; line-height: 1.5;
+}
+.icon-btn.send { background: var(--accent); color: var(--on-accent); }
+.icon-btn.send:disabled { background: var(--surface-tint); color: var(--text-tertiary); }
+.share-preview {
+  max-height: 40dvh; overflow: auto; margin: 0;
+  padding: var(--space-3); border-radius: var(--radius-sm);
+  background: var(--surface-tint);
+  font: 13px/1.5 var(--font-sans); white-space: pre-wrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .row, .btn, .tab .pill, .bar > .fill { transition: none; }
   .row:active, .btn:active { transform: none; }

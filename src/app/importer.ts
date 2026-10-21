@@ -23,8 +23,9 @@ export interface Transcript {
 
 export interface Transcriber {
   /** Resolves false when the user declines the one-time model download. */
-  prepare(): Promise<boolean>;
+  prepare(onProgress: (fraction: number, detail: string) => void): Promise<boolean>;
   transcribe(audio: Blob, onProgress: (fraction: number, detail: string) => void): Promise<Transcript>;
+  idle?(): void;
 }
 
 export interface ImporterHooks {
@@ -101,6 +102,8 @@ export class Importer {
       }
     } finally {
       this.running = false;
+      this.transcriber.idle?.();
+      this.hooks.changed();
     }
   }
 
@@ -120,7 +123,7 @@ export class Importer {
       }
       if (!item.blob) throw new Error('파일 내용을 읽지 못했어요.');
       update({ stage: 'transcribing', progress: 0, detail: '음성 인식 준비 중' });
-      if (!(await this.transcriber.prepare())) {
+      if (!(await this.transcriber.prepare((fraction, detail) => update({ progress: fraction, detail })))) {
         update({ stage: 'error', detail: '음성 인식 모델을 내려받아야 글로 바꿀 수 있어요.' });
         return;
       }
