@@ -33,6 +33,10 @@ export function formatShortDate(ts: number): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
 
+export function formatShortDateTime(ts: number): string {
+  return `${formatShortDate(ts)} ${clock(new Date(ts))}`;
+}
+
 export function formatDuration(totalSeconds: number): string {
   const s = Math.max(0, Math.round(totalSeconds));
   const h = Math.floor(s / 3600);

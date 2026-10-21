@@ -37,6 +37,14 @@ describe('search', () => {
     expect(marks(hits[1]!.snippets)).toEqual(['계약서']);
   });
 
+  test('SenseVoice transcripts with spaces inside words still match the normally spaced word', () => {
+    const asr = [makeDoc(rec('asr', '조 금만 생각 을 하 면서 살 면 훨씬 편할 거야.', T0))];
+    expect(marks(search(asr, '조금만')[0]!.snippets)).toEqual(['조 금만']);
+    expect(marks(search(asr, '하면서')[0]!.snippets)).toEqual(['하 면서']);
+    expect(marks(search(asr, '생각을 하면서')[0]!.snippets)).toEqual(['생각 을', '하 면서']);
+    expect(search(asr, '조금만')[0]!.record.text).toBe('조 금만 생각 을 하 면서 살 면 훨씬 편할 거야.');
+  });
+
   test('space-separated terms must all match', () => {
     expect(ids('계약 내일')).toEqual(['a']);
     expect(ids('계약 금요일')).toEqual([]);
