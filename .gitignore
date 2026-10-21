@@ -1,0 +1,5 @@
+node_modules/
+.omo/
+*.log
+/qa-artifacts/
+.DS_Store
